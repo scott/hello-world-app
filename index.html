@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hello, world.</title>
+    <meta
+      name="description"
+      content="A small hello world page. Switch the greeting, keep the local hour."
+    />
+    <meta name="theme-color" content="#f3eee6" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;1,9..144,500&family=Outfit:wght@300;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f3eee6;
+        --ink: #1c1814;
+        --muted: #4e4942;
+        --line: rgba(28, 24, 20, 0.14);
+        --terra: #b64022;
+        --sun-glow: rgba(196, 104, 48, 0.22);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        min-height: 100dvh;
+        color: var(--ink);
+        background:
+          radial-gradient(900px 520px at 100% -10%, #f8e3c4 0%, transparent 58%),
+          radial-gradient(700px 480px at -15% 110%, #e4eee6 0%, transparent 52%),
+          var(--paper);
+        font-family: Outfit, "Avenir Next", "Segoe UI", sans-serif;
+        font-weight: 400;
+        font-size: 1.05rem;
+        line-height: 1.5;
+        letter-spacing: -0.011em;
+      }
+
+      .sky {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .sun,
+      .orbit {
+        position: absolute;
+        border-radius: 50%;
+      }
+
+      .sun {
+        width: min(34vw, 380px);
+        aspect-ratio: 1;
+        right: -5vw;
+        top: -7vw;
+        background: radial-gradient(
+          circle at 35% 35%,
+          #fff8e6 0%,
+          #f4d48a 26%,
+          #e8a45c 60%,
+          #d97845 100%
+        );
+        box-shadow:
+          0 0 0 1px rgba(255, 248, 230, 0.65),
+          0 24px 90px var(--sun-glow);
+      }
+
+      .orbit {
+        width: min(78vw, 860px);
+        aspect-ratio: 1;
+        right: -24vw;
+        top: -36vw;
+        border: 1px solid var(--line);
+      }
+
+      .orbit-inner {
+        width: min(52vw, 560px);
+        aspect-ratio: 1;
+        right: -12vw;
+        top: -20vw;
+        border: 1px solid rgba(28, 24, 20, 0.08);
+      }
+
+      .grain {
+        position: absolute;
+        inset: 0;
+        opacity: 0.28;
+        mix-blend-mode: multiply;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      }
+
+      .frame {
+        position: relative;
+        z-index: 1;
+        min-height: 100dvh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 2rem;
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        padding: clamp(1.25rem, 3vw, 2.4rem) clamp(1.25rem, 4vw, 3rem) clamp(1.4rem, 3vw, 2rem);
+      }
+
+      header {
+        display: flex;
+        align-items: baseline;
+        justify-content: flex-start;
+        gap: 1.35rem;
+      }
+
+      footer {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .eyebrow,
+      .count,
+      .mark {
+        margin: 0;
+        font-size: 0.78rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .count {
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.08em;
+      }
+
+      .dim {
+        color: rgba(78, 73, 66, 0.72);
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-bottom: 4vh;
+      }
+
+      h1 {
+        margin: 0;
+        font-family: Fraunces, "Iowan Old Style", Palatino, Georgia, serif;
+        font-weight: 560;
+        font-size: clamp(3.4rem, 10vw, 8.4rem);
+        line-height: 0.88;
+        letter-spacing: -0.045em;
+      }
+
+      .line {
+        display: block;
+        animation: rise 720ms ease backwards;
+        transition: opacity 180ms ease, transform 180ms ease;
+      }
+
+      .accent {
+        font-style: italic;
+        font-weight: 500;
+        color: var(--terra);
+        padding-left: 0.42em;
+        animation-delay: 80ms;
+      }
+
+      h1.is-fading .line {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      .lede {
+        max-width: 34rem;
+        margin: 1.5rem 0 0;
+        color: var(--muted);
+        font-size: 1.12rem;
+        text-wrap: pretty;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2.2rem;
+      }
+
+      button {
+        appearance: none;
+        border: 0;
+        background: var(--ink);
+        color: var(--paper);
+        font: inherit;
+        font-size: 0.98rem;
+        letter-spacing: -0.01em;
+        padding: 0.82rem 1.2rem;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #2c261f;
+      }
+
+      button:focus-visible {
+        outline: 2px solid var(--terra);
+        outline-offset: 3px;
+      }
+
+      .lang {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.98rem;
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding-top: 1rem;
+      }
+
+      #when {
+        margin: 0;
+        font-variant-numeric: tabular-nums;
+      }
+
+      ::selection {
+        background: #f0c36a;
+        color: var(--ink);
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @media (max-width: 720px) {
+        header,
+        footer,
+        .controls {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 0.4rem;
+        }
+
+        .sun {
+          width: 190px;
+          right: -70px;
+          top: -50px;
+        }
+
+        .orbit,
+        .orbit-inner {
+          display: none;
+        }
+
+        h1 {
+          font-size: clamp(2.7rem, 15vw, 4.4rem);
+        }
+
+        .lede {
+          font-size: 1.02rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sky" aria-hidden="true">
+      <div class="orbit"></div>
+      <div class="orbit orbit-inner"></div>
+      <div class="sun"></div>
+      <div class="grain"></div>
+    </div>
+
+    <div class="frame">
+      <header>
+        <p class="eyebrow" id="daypart">Good day</p>
+        <p class="count"><span id="n">01</span><span class="dim"> / 10</span></p>
+      </header>
+
+      <main>
+        <h1 id="greeting" lang="en">
+          <span class="line" id="hello">Hello,</span>
+          <span class="line accent" id="world">world.</span>
+        </h1>
+        <p class="lede">
+          A single page for the open web. Change the language. The hour stays yours.
+        </p>
+        <div class="controls">
+          <button type="button" id="next" aria-describedby="lang">Another language</button>
+          <p class="lang" id="lang">English</p>
+        </div>
+      </main>
+
+      <footer>
+        <p id="when">Local time</p>
+        <p class="mark">GitHub Pages</p>
+      </footer>
+    </div>
+
+    <script>
+      const greetings = [
+        { hello: "Hello,", world: "world.", name: "English", lang: "en" },
+        { hello: "Hola,", world: "mundo.", name: "Español", lang: "es" },
+        { hello: "Bonjour,", world: "le monde.", name: "Français", lang: "fr" },
+        { hello: "Ciao,", world: "mondo.", name: "Italiano", lang: "it" },
+        { hello: "Hallo,", world: "Welt.", name: "Deutsch", lang: "de" },
+        { hello: "Olá,", world: "mundo.", name: "Português", lang: "pt" },
+        { hello: "Hej,", world: "världen.", name: "Svenska", lang: "sv" },
+        { hello: "こんにちは、", world: "世界。", name: "日本語", lang: "ja" },
+        { hello: "안녕하세요,", world: "세계.", name: "한국어", lang: "ko" },
+        { hello: "Привет,", world: "мир.", name: "Русский", lang: "ru" },
+      ];
+
+      const helloEl = document.querySelector("#hello");
+      const worldEl = document.querySelector("#world");
+      const greeting = document.querySelector("#greeting");
+      const langEl = document.querySelector("#lang");
+      const indexEl = document.querySelector("#n");
+      const next = document.querySelector("#next");
+      const daypart = document.querySelector("#daypart");
+      const when = document.querySelector("#when");
+      const sun = document.querySelector(".sun");
+      const orbits = document.querySelectorAll(".orbit");
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const finePointer = window.matchMedia("(pointer: fine)").matches;
+
+      let index = 0;
+      let fadeTimer = 0;
+
+      function applyGreeting(item, position) {
+        helloEl.textContent = item.hello;
+        worldEl.textContent = item.world;
+        langEl.textContent = item.name;
+        indexEl.textContent = String(position + 1).padStart(2, "0");
+        greeting.lang = item.lang;
+        document.title = item.hello + " " + item.world;
+      }
+
+      function showGreeting(position) {
+        const item = greetings[position];
+        window.clearTimeout(fadeTimer);
+        if (reduceMotion) {
+          applyGreeting(item, position);
+          return;
+        }
+        greeting.classList.add("is-fading");
+        fadeTimer = window.setTimeout(() => {
+          applyGreeting(item, position);
+          greeting.classList.remove("is-fading");
+        }, 160);
+      }
+
+      next.addEventListener("click", () => {
+        index = (index + 1) % greetings.length;
+        showGreeting(index);
+      });
+
+      function renderClock() {
+        const now = new Date();
+        const hour = now.getHours();
+        let part = "Good evening";
+        if (hour < 5 || hour >= 22) part = "Good night";
+        else if (hour < 12) part = "Good morning";
+        else if (hour < 17) part = "Good afternoon";
+        daypart.textContent = part;
+
+        const date = new Intl.DateTimeFormat(undefined, {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+        }).format(now);
+        const time = new Intl.DateTimeFormat(undefined, {
+          hour: "numeric",
+          minute: "2-digit",
+        }).format(now);
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local";
+        const city = zone.split("/").pop().replace(/_/g, " ");
+        const text = date + " · " + city + " · " + time;
+        if (when.textContent !== text) when.textContent = text;
+      }
+
+      renderClock();
+      window.setInterval(renderClock, 1000);
+
+      if (finePointer && !reduceMotion) {
+        window.addEventListener(
+          "pointermove",
+          (event) => {
+            const dx = (event.clientX / window.innerWidth - 0.5) * 18;
+            const dy = (event.clientY / window.innerHeight - 0.5) * 12;
+            sun.style.transform = "translate(" + dx + "px, " + dy + "px)";
+            orbits.forEach((orbit, i) => {
+              const scale = i === 0 ? 0.35 : 0.2;
+              orbit.style.transform =
+                "translate(" + dx * scale + "px, " + dy * scale + "px)";
+            });
+          },
+          { passive: true }
+        );
+      }
+    </script>
+  </body>
+</html>
